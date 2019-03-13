@@ -1,0 +1,3 @@
+proc beebs_load { file } {
+    return "fail unimplemented"
+}
