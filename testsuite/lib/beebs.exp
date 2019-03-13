@@ -113,11 +113,21 @@ proc beebs_run_all_benchmarks { board objdir } {
                 error "Failed to run benchmark '$benchmark' ($benchmark_file)\n$msg"
             } {
                 if { [lindex $beebs_run_benchmark_result 0 ] == "pass" } {
-                    pass "$benchmark"
+                    pass "$benchmark: execute"
                 } {
                     verbose -log "Fail $benchmark: $beebs_run_benchmark_result"
-                    fail "$benchmark"
+                    fail "$benchmark: execute"
                 }
+                # if beebs_run_benchmark returned an execution time as well as
+                # pass/fail, the value is saved for printing at the end of this
+                # proc
+                set exec_time [lindex $beebs_run_benchmark_result 1 ]
+                if { $exec_time != "" } {
+                    set results($benchmark) $exec_time
+                    pass "$benchmark: measure execution time"
+                } {
+                    verbose -log "Fail $benchmark: no execution time returned by beebs_run_benchmark"
+                    fail "$benchmark: measure execution time"
             }
 
             # Cleanup.
@@ -129,6 +139,26 @@ proc beebs_run_all_benchmarks { board objdir } {
             unresolved "$benchmark"
         }
     }
+
+    send_user "\n"
+    send_user "\t\t=== Execution time table ===\n"
+    send_user "\n"
+    send_user    [format "%-19s  %6s\n" "Benchmark" "Time"]
+    send_user -- [format "%-19s  %6s\n" "---------" "----"]
+
+    set exec_time_tot [expr {0}]
+
+    foreach r [lsort [array names results]] {
+       set l $results($r)
+       set exec_time_val [lindex $l 0]
+
+       set exec_time_tot [expr {$exec_time_tot + $exec_time_val}]
+
+       send_user [format "%-19s  %6d\n" $r $exec_time_val]
+    }
+
+    send_user -- [format "%-19s  %6s\n" "---------" "----"]
+    send_user [format "%-19s  %6d\n" "Total" $exec_time_tot]
 
     # Now cleanup after we've finished running all the benchmarks.
     if { [catch {beebs_cleanup_after_all_benchmarks} msg] } {

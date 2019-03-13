@@ -1,3 +1,29 @@
 proc beebs_load { file } {
-    return "fail unimplemented"
+    set GDB riscv32-unknown-elf-gdb
+    # script to connect, load, continue and quit gdb
+    set GDB_SCRIPT config/ri5cy-cmd.gdb
+
+    # load and run
+    spawn $GDB -ex "file $file" --command $GDB_SCRIPT
+    # extract cycle count
+    expect {
+       -re ".*Cycle count: (\[0-9\]+)" {
+           set cycle_count $expect_out(1,string)
+       }
+       timeout {
+           unresolved "$file: get cycle count (timeout)\n"
+           return fail
+       }
+    }
+    # check exited normally
+    expect {
+       -re "\[Inferior 1 \(\(1,1)) exited normally]" {
+           return [list pass $cycle_count]
+       }
+       timeout {
+           unresolved "$file: exited normally (timeout)\n"
+       }
+    }
+
+    return fail
 }
