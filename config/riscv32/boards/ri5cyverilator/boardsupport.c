@@ -18,20 +18,27 @@
    along with this program. If not, see <http://www.gnu.org/licenses/>. */
 
 #include <support.h>
+#include <stdint.h>
+#include <stdio.h>
 
 void initialise_board()
 {
-  asm volatile ("li a0, 0" : : : "a0");
 }
+
+uint32_t start_cycles;
+uint32_t stop_cycles;
 
 void start_trigger()
 {
-  asm volatile ("li a0, 0" : : : "a0");
+  //asm volatile ("csrr %0, mcycle"
+  //              : "=r" (start_cycles));
 }
 
 void stop_trigger()
 {
-  asm volatile ("li a0, 0" : : : "a0");
+  //asm volatile ("csrr %0, mcycle"
+  //              : "=r" (stop_cycles));
+  printf("Cycle count: %d\n", 99); //stop_cycles - start_cycles);
 }
 
 

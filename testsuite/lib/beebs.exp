@@ -66,9 +66,6 @@ proc default_beebs_run_benchmark { benchmark filename } {
 # Main loop to run all benchmarks.
 proc beebs_run_all_benchmarks { board objdir } {
     global beebs_run_benchmark_result
-    global benchmarks
-    global objdir
-    global srcdir
 
     # Perform any setup required before running any benchmarks.
     if { [catch {beebs_setup_before_all_benchmarks} msg] } {
@@ -128,6 +125,7 @@ proc beebs_run_all_benchmarks { board objdir } {
                 } {
                     verbose -log "Fail $benchmark: no execution time returned by beebs_run_benchmark"
                     fail "$benchmark: measure execution time"
+                }
             }
 
             # Cleanup.
